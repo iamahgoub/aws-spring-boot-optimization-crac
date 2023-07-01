@@ -26,9 +26,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import org.crac.Context;
+import org.crac.Core;
+import org.crac.Resource;
+
 @Slf4j
 @Repository
-public class CustomerRepository {
+public class CustomerRepository implements Resource {
 
     public static final String TABLE_NAME = "Customer";
     public static final String ID_COLUMN = "Id";
@@ -46,6 +50,8 @@ public class CustomerRepository {
         this.client = client;
 
         sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        
+        Core.getGlobalContext().register(this);
     }
 
     public Customer save(final Customer customer) {
@@ -160,4 +166,16 @@ public class CustomerRepository {
 
         return customer;
     }
+
+   @Override
+   public void beforeCheckpoint(Context<? extends Resource> context) throws Exception {
+       System.out.println("Executing beforeCheckpoint...");
+       client.close();
+   }
+   
+   @Override
+   public void afterRestore(Context<? extends Resource> context) throws Exception {
+       System.out.println("Executing afterCheckpoint...");
+       
+   }
 }
