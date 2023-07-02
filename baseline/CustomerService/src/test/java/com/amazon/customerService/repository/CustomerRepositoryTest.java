@@ -81,7 +81,7 @@ public class CustomerRepositoryTest {
         Customer customer = new Customer();
         customer.setAccountNumber("111111");
         customer.setEmail("test@test.com");
-        customer.setRegDate(Instant.now());
+ //       customer.setRegDate(Instant.now());
         customer.setName("John Doe");
 
         UUID uuid = UUID.randomUUID();

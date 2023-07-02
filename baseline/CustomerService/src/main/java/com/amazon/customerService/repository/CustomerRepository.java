@@ -15,20 +15,35 @@
 
 package com.amazon.customerService.repository;
 
-import com.amazon.customerService.model.Customer;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import software.amazon.awssdk.services.dynamodb.model.*;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.crac.Context;
 import org.crac.Core;
 import org.crac.Resource;
+import org.springframework.stereotype.Repository;
+
+import com.amazon.customerService.model.Customer;
+
+import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
+import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.DeleteItemResponse;
+import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
+import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
+import software.amazon.awssdk.services.dynamodb.model.PutItemResponse;
+import software.amazon.awssdk.services.dynamodb.model.ScanRequest;
 
 @Slf4j
 @Repository
@@ -41,13 +56,12 @@ public class CustomerRepository implements Resource {
     public static final String ACCOUNT_NUMBER_COLUMN = "AccountNumber";
     public static final String REGISTRATION_DATE_COLUMN = "RegistrationDate";
 
-    final DynamoDbClient client;
+    DynamoDbClient client;
 
     private final SimpleDateFormat sdf;
 
-    @Autowired
-    public CustomerRepository(DynamoDbClient client) {
-        this.client = client;
+    public CustomerRepository() {
+    	this.client = createDynamoDbClient();
 
         sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         
@@ -166,6 +180,18 @@ public class CustomerRepository implements Resource {
 
         return customer;
     }
+    
+    public DynamoDbClient createDynamoDbClient() {
+        AwsCredentialsProvider credentialsProvider =
+                DefaultCredentialsProvider.builder()
+                        .profileName("default")
+                        .build();
+
+        return DynamoDbClient.builder()
+                .region(Region.EU_WEST_1)
+                .credentialsProvider(credentialsProvider)
+                .build();
+    }
 
    @Override
    public void beforeCheckpoint(Context<? extends Resource> context) throws Exception {
@@ -176,6 +202,7 @@ public class CustomerRepository implements Resource {
    @Override
    public void afterRestore(Context<? extends Resource> context) throws Exception {
        System.out.println("Executing afterCheckpoint...");
+       client = createDynamoDbClient();
        
    }
 }
