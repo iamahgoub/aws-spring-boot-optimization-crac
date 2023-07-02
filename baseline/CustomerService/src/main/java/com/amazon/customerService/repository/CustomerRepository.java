@@ -182,14 +182,8 @@ public class CustomerRepository implements Resource {
     }
     
     public DynamoDbClient createDynamoDbClient() {
-        AwsCredentialsProvider credentialsProvider =
-                DefaultCredentialsProvider.builder()
-                        .profileName("default")
-                        .build();
-
         return DynamoDbClient.builder()
                 .region(Region.EU_WEST_1)
-                .credentialsProvider(credentialsProvider)
                 .build();
     }
 
