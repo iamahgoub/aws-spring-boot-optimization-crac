@@ -20,3 +20,12 @@ spec:
         - containerPort: 8080
           name: http
           protocol: TCP
+        securityContext:
+          capabilities:
+            add:
+              - all
+          privileged: true
+          runAsUser: 0
+          allowPrivilegeEscalation: true
+        command: ["/bin/bash"]
+        args: ["/opt/scripts/run-service.sh"]
