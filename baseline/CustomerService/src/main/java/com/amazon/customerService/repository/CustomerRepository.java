@@ -33,7 +33,7 @@ import com.amazon.customerService.model.Customer;
 
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.WebIdentityTokenFileCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -61,7 +61,9 @@ public class CustomerRepository implements Resource {
     private final SimpleDateFormat sdf;
 
     public CustomerRepository() {
-    	this.client = createDynamoDbClient();
+    	this.client = DynamoDbClient.builder()
+                .region(Region.EU_WEST_1)
+                .build();
 
         sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         
@@ -182,8 +184,14 @@ public class CustomerRepository implements Resource {
     }
     
     public DynamoDbClient createDynamoDbClient() {
-        return DynamoDbClient.builder()
+        
+    	AwsCredentialsProvider credentialsProvider =
+    			WebIdentityTokenFileCredentialsProvider.builder()
+                        .build();
+    	
+    	return DynamoDbClient.builder()
                 .region(Region.EU_WEST_1)
+                .credentialsProvider(credentialsProvider)
                 .build();
     }
 
