@@ -1,0 +1,24 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+  build:
+    commands:
+      - echo Build started on `date`
+      - export COMMITID=${CODEBUILD_RESOLVED_SOURCE_VERSION:0:7}
+      - DOCKER_BUILDKIT=1 docker build -t $IMAGE_REPO_NAME:$COMMITID .
+      - docker run --detach --privileged --rm --name $IMAGE_REPO_NAME $IMAGE_REPO_NAME:$COMMITID /opt/scripts/checkpoint.sh
+      - docker exec -u root $IMAGE_REPO_NAME /opt/scripts/checkpoint-wait.sh
+      - docker commit $IMAGE_REPO_NAME $IMAGE_REPO_NAME:$COMMITID-checkpoint
+      - docker tag $IMAGE_REPO_NAME:$COMMITID $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$COMMITID
+      - docker tag $IMAGE_REPO_NAME:$COMMITID-checkpoint $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$COMMITID-checkpoint   
+
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$COMMITID
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$COMMITID-checkpoint
