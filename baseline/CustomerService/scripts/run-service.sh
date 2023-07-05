@@ -1,5 +1,5 @@
 # run java
-java -XX:CRaCRestoreFrom=/opt/crac-files
+java -XX:CRaCRestoreFrom=/opt/crac-files -Daws.webIdentityTokenFile="${AWS_WEB_IDENTITY_TOKEN_FILE}" -Daws.roleArn="${AWS_ROLE_ARN}" 
 
 # the code below is to keep the container running if the java process failed 
 echo Executing an infinite loop to keep the container running...
