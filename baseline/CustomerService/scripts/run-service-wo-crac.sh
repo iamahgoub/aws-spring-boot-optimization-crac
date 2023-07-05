@@ -1,0 +1,3 @@
+# run java
+echo Starting the application...
+java -Dspring.profiles.active=prod -XX:CRaCCheckpointTo=/opt/crac-files -jar /CustomerService-0.0.1.jar 
