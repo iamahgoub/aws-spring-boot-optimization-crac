@@ -194,8 +194,19 @@ public class CustomerRepository implements Resource {
    
    @Override
    public void afterRestore(Context<? extends Resource> context) throws Exception {
-       System.out.println("Executing afterCheckpoint...");
-       client = createDynamoDbClient();
+	   System.out.println("Executing afterCheckpoint...");
+
+	   SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");//dd/MM/yyyy
+
+	   Date now = new Date();
+	   String strDate = sdfDate.format(now);
+	   System.out.println("Time after restore and before re-creating the client:" + strDate);
+
+	   client = createDynamoDbClient();
+	   
+	   now = new Date();
+	   strDate = sdfDate.format(now);
+	   System.out.println("Time after re-creating the client:" + strDate);
        
    }
 }
